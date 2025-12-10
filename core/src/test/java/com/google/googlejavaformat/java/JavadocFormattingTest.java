@@ -1440,6 +1440,23 @@ public final class JavadocFormattingTest {
   }
 
   @Test
+  public void javadocsOnlyFileNotReformatted() {
+    String[] input = {
+      "/** This Javadoc should not be wrapped even though it is well over the formatter line width"
+          + " when there is no code. */",
+      "/** Another very long Javadoc line that would normally be wrapped by the formatter but should"
+          + " stay intact here. */",
+    };
+    String[] expected = {
+      "/** This Javadoc should not be wrapped even though it is well over the formatter line width"
+          + " when there is no code. */",
+      "/** Another very long Javadoc line that would normally be wrapped by the formatter but should"
+          + " stay intact here. */",
+    };
+    doFormatTest(input, expected);
+  }
+
+  @Test
   public void u2028LineSeparator() {
     String[] input = {
       "public class Foo {",

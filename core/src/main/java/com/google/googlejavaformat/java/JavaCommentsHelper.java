@@ -85,7 +85,7 @@ public final class JavaCommentsHelper implements CommentsHelper {
   private static boolean hasNonCommentTokens(JavaInput javaInput) {
     int eofIndex = javaInput.getkN();
     for (Input.Token token : javaInput.getTokens()) {
-      if (token.getTok().isToken() && token.getTok().getIndex() != eofIndex) {
+      if (token.getTok().getIndex() != eofIndex) {
         return true;
       }
     }

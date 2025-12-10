@@ -17,6 +17,7 @@ package com.google.googlejavaformat.java;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 import com.google.googlejavaformat.CommentsHelper;
+import com.google.googlejavaformat.Input;
 import com.google.googlejavaformat.Input.Tok;
 import com.google.googlejavaformat.Newlines;
 import com.google.googlejavaformat.java.javadoc.JavadocFormatter;
@@ -31,10 +32,14 @@ public final class JavaCommentsHelper implements CommentsHelper {
 
   private final String lineSeparator;
   private final JavaFormatterOptions options;
+  private final JavaInput javaInput;
+  private final boolean hasNonCommentTokens;
 
-  public JavaCommentsHelper(String lineSeparator, JavaFormatterOptions options) {
+  public JavaCommentsHelper(String lineSeparator, JavaFormatterOptions options, JavaInput javaInput) {
     this.lineSeparator = lineSeparator;
     this.options = options;
+    this.javaInput = javaInput;
+    this.hasNonCommentTokens = hasNonCommentTokens(javaInput);
   }
 
   @Override
@@ -44,6 +49,9 @@ public final class JavaCommentsHelper implements CommentsHelper {
     }
     String text = tok.getOriginalText();
     if (tok.isJavadocComment() && options.formatJavadoc()) {
+      if (isAttachedToEof(tok) && !hasNonCommentTokens) {
+        return tok.getOriginalText();
+      }
       text = JavadocFormatter.formatJavadoc(text, column0);
     }
     List<String> lines = new ArrayList<>();
@@ -64,6 +72,24 @@ public final class JavaCommentsHelper implements CommentsHelper {
                 javadocShaped(lines)
                     ? indentJavadoc(lines, column0)
                     : preserveIndentation(lines, column0));
+  }
+
+  private boolean isAttachedToEof(Tok tok) {
+    if (tok.getIndex() < 0) {
+      return false;
+    }
+    Input.Token owner = javaInput.getToken(tok.getIndex());
+    return owner.getTok().getIndex() == javaInput.getkN();
+  }
+
+  private static boolean hasNonCommentTokens(JavaInput javaInput) {
+    int eofIndex = javaInput.getkN();
+    for (Input.Token token : javaInput.getTokens()) {
+      if (token.getTok().isToken() && token.getTok().getIndex() != eofIndex) {
+        return true;
+      }
+    }
+    return false;
   }
 
   // For non-javadoc-shaped block comments, shift the entire block to the correct

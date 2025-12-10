@@ -274,7 +274,8 @@ public final class Formatter {
 
     String lineSeparator = Newlines.guessLineSeparator(input);
     JavaOutput javaOutput =
-        new JavaOutput(lineSeparator, javaInput, new JavaCommentsHelper(lineSeparator, options));
+        new JavaOutput(
+            lineSeparator, javaInput, new JavaCommentsHelper(lineSeparator, options, javaInput));
     try {
       format(javaInput, javaOutput, options);
     } catch (FormattingError e) {
